@@ -3,5 +3,9 @@
   "google_client_id": "YOUR_GOOGLE_OAUTH_CLIENT_ID",
   "google_client_secret": "YOUR_GOOGLE_OAUTH_CLIENT_SECRET",
   "google_refresh_token": "YOUR_GOOGLE_OAUTH_REFRESH_TOKEN",
-  "openai_api_key": "YOUR_OPENAI_API_KEY"
+  "openai_api_key": "YOUR_OPENAI_API_KEY",
+  "unsplash_access_key": "OPTIONAL_UNSPLASH_ACCESS_KEY",
+  "article_language": "English",
+  "trends_geo": "US",
+  "min_article_words": 800
 }
