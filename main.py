@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from html import escape
 import os
 import re
 import sys
@@ -59,8 +60,8 @@ def save_preview(article: dict, image: dict | None) -> Path:
         )
     path.write_text(
         "<!doctype html><html><head><meta charset=\"utf-8\">"
-        f"<title>{article['title']}</title></head><body><h1>{article['title']}</h1>"
-        f"<p><strong>Meta description:</strong> {article['meta_description']}</p>{content}</body></html>",
+        f"<title>{escape(article['title'])}</title></head><body><h1>{escape(article['title'])}</h1>"
+        f"<p><strong>Meta description:</strong> {escape(article['meta_description'])}</p>{content}</body></html>",
         encoding="utf-8",
     )
     return path
