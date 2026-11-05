@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import requests
+import bleach
 from html.parser import HTMLParser
 
 
@@ -73,6 +74,13 @@ Return JSON with exactly these keys:
         raise RuntimeError("Generated article is missing fields: " + ", ".join(missing))
     if not isinstance(article.get("tags", []), list):
         article["tags"] = []
+    article["content_html"] = bleach.clean(
+        article["content_html"],
+        tags={"h2", "h3", "p", "ul", "ol", "li", "strong", "em", "blockquote", "a"},
+        attributes={"a": ["href", "title"]},
+        protocols={"http", "https"},
+        strip=True,
+    )
     count = word_count(article["content_html"])
     article["word_count"] = count
     if count < min_words:
