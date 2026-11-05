@@ -82,6 +82,9 @@ def run(dry_run: bool = False) -> None:
         language=os.getenv("ARTICLE_LANGUAGE", "English"),
         min_words=int(os.getenv("MIN_ARTICLE_WORDS", "800")),
     )
+    known_titles = {normalize(title) for title in history.get("titles", [])}
+    if normalize(article["title"]) in known_titles:
+        raise RuntimeError("Duplicate article title detected. No Blogger draft was created; review the topic/history.")
     image = find_image(article.get("focus_keyword") or article["title"], os.getenv("UNSPLASH_ACCESS_KEY", "").strip())
     preview = save_preview(article, image)
     print(f"Article generated ({article['word_count']} words). Preview: {preview}")
