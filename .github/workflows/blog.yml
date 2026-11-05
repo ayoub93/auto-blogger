@@ -1,28 +1,62 @@
-name: Auto Blogger - Connection Test
+name: AI Blogger Agent
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: ai-blogger-agent
+  cancel-in-progress: false
 
 jobs:
-  connection-test:
+  create-review-draft:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Test Blogger API connection only
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Generate article and create Blogger draft
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+          ARTICLE_LANGUAGE: English
+          TRENDS_GEO: US
+          MIN_ARTICLE_WORDS: "800"
         run: python main.py
+      - name: Commit duplicate history and review queue
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add used_titles.json pending_review.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update AI Blogger review queue"
+            git push origin HEAD:main
+          else
+            echo "No history changes to commit."
+          fi
+      - name: Upload generated preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blogger-agent-preview
+          path: output/
+          if-no-files-found: ignore
+          retention-days: 7
