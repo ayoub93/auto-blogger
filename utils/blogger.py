@@ -1,6 +1,7 @@
 """Blogger API v3 client. Draft creation only; no publishing method is exposed."""
 from __future__ import annotations
 import os
+from html import escape
 import requests
 
 
@@ -37,9 +38,9 @@ class BloggerClient:
         content = article["content_html"]
         if image and image.get("url"):
             content = (
-                f'<figure><img src="{image["url"]}" alt="{article["title"]}" style="max-width:100%;height:auto" />'
-                f'<figcaption>Photo by <a href="{image["author_url"]}">{image["author"]}</a> '
-                f'on <a href="{image["source_url"]}">Unsplash</a></figcaption></figure>\n' + content
+                f'<figure><img src="{escape(image["url"], quote=True)}" alt="{escape(article["title"], quote=True)}" style="max-width:100%;height:auto" />'
+                f'<figcaption>Photo by <a href="{escape(image["author_url"], quote=True)}">{escape(image["author"])}</a> '
+                f'on <a href="{escape(image["source_url"], quote=True)}">Unsplash</a></figcaption></figure>\n' + content
             )
         # isDraft=true is intentional. This agent never publishes automatically.
         response = self.session.post(
